@@ -16,7 +16,7 @@ class Tensor(np.ndarray):
 
     def __new__(cls, input_array):
         # Create a new instance of the Tensor
-        obj = np.asarray(a=???).view(type=cls)
+        obj = np.asarray(a=input_array).view(type=cls)
         obj.trainable = True
         return obj
 
