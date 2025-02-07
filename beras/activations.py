@@ -21,7 +21,7 @@ class LeakyReLU(Activation):
 
     def forward(self, x) -> Tensor:
         """Leaky ReLu forward propagation!"""
-        return NotImplementedError
+        return Tensor(np.where(x > 0, x, self.alpha * x))
 
     def get_input_gradients(self) -> list[Tensor]:
         """
@@ -29,7 +29,8 @@ class LeakyReLU(Activation):
         To see what methods/variables you have access to, refer to the cheat sheet.
         Hint: Make sure not to mutate any instance variables. Return a new list[tensor(s)]
         """
-        raise NotImplementedError
+        return [Tensor(np.where(output > 0, 1, -self.alpha))
+                for output in self.outputs]
 
     def compose_input_gradients(self, J):
         return self.get_input_gradients()[0] * J
@@ -48,14 +49,15 @@ class Sigmoid(Activation):
     ## TODO: Implement for default output activation to bind output to 0-1
     
     def forward(self, x) -> Tensor:
-        raise NotImplementedError
+        return Tensor(np.reciprocal(1 + np.exp(-x)))
 
     def get_input_gradients(self) -> list[Tensor]:
         """
         To see what methods/variables you have access to, refer to the cheat sheet.
         Hint: Make sure not to mutate any instance variables. Return a new list[tensor(s)]
         """
-        raise NotImplementedError
+        return [Tensor(self.output * (1 - self.output))
+                for output in self.outputs]
 
     def compose_input_gradients(self, J):
         return self.get_input_gradients()[0] * J
@@ -74,7 +76,8 @@ class Softmax(Activation):
 
         ## HINT: Use stable softmax, which subtracts maximum from
         ## all entries to prevent overflow/underflow issues
-        raise NotImplementedError
+        exps = np.exp(x - np.max(x))
+        return Tensor(exps / np.sum(exps, axis=-1, keepdims=True))
 
     def get_input_gradients(self):
         """Softmax input gradients!"""
@@ -83,4 +86,7 @@ class Softmax(Activation):
         grad = np.zeros(shape=(bn, n, n), dtype=x.dtype)
         
         # TODO: Implement softmax gradient
-        raise NotImplementedError
+        for i, output in enumerate(self.outputs):
+            np.fill_diagonal(grad[i, :, :], output)
+            grad[i, :, :] -= np.outer(output, output)
+        return [Tensor(grad[i, :, :]) for i in range(len(self.outputs))]
