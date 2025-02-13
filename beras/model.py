@@ -148,6 +148,7 @@ class SequentialModel(Model):
         if training:
             with GradientTape() as tape:
                 loss, acc, _ = forward_pass()
+            self.weights = tape.gradient(loss, self.weights)
             return {"loss": loss, "acc": acc}
         else:
             loss, acc, predictions = forward_pass()
