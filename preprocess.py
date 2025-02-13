@@ -11,3 +11,12 @@ def load_and_preprocess_data() -> tuple[Tensor, Tensor, Tensor, Tensor]:
     
     #Load in the training and testing data from the MNIST dataset
     (train_inputs, train_labels), (test_inputs, test_labels) = datasets.mnist.load_data()
+
+    # Flatten, normalize to 0-1, and convert to tensor
+    def flatten_and_normalize(input):
+        input.flatten()
+        input /= 255.0
+    flatten_and_normalize(train_inputs)
+    flatten_and_normalize(test_inputs)
+
+    return tuple(Tensor(x) for x in [train_inputs, train_labels, test_inputs, test_labels])
