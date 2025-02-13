@@ -57,7 +57,7 @@ class Model(Diffable):
         """
         Return the weights of the model by iterating through the layers
         """
-        return NotImplementedError
+        return [layer.weights() for layer in self.layers]
 
     def compile(self, optimizer: Diffable, loss_fn: Diffable, acc_fn: Callable):
         """
@@ -74,7 +74,17 @@ class Model(Diffable):
         Trains the model by iterating over the input dataset and feeding input batches
         into the batch_step method with training. At the end, the metrics are returned.
         """
-        return NotImplementedError
+        metrics_dict = defaultdict(lambda: 0)
+        num_batches = len(x) // batch_size
+        for i in range(epochs):
+            for j in range(num_batches):
+                update_metric_dict(
+                    metrics_dict,
+                    self.batch_step(x[j * batch_size:(j + 1) * batch_size],
+                                    y[j * batch_size:(j + 1) * batch_size]))
+                print_stats(metrics_dict, j, num_batches, i)
+            print_stats(metrics_dict, None, num_batches, i, True)
+        return metrics_dict
 
     def evaluate(self, x: Tensor, y: Union[Tensor, np.ndarray], batch_size: int):
         """
@@ -86,7 +96,15 @@ class Model(Diffable):
         NOTE: This method is almost identical to fit (think about how training and testing differ --
         the core logic should be the same)
         """
-        return NotImplementedError
+        metrics_dict = defaultdict(lambda: 0)
+        num_batches = len(x) // batch_size
+        for j in range(num_batches):
+            update_metric_dict(
+                metrics_dict,
+                self.batch_step(x[j * batch_size:(j + 1) * batch_size],
+                                y[j * batch_size:(j + 1) * batch_size]))
+        print_stats(metrics_dict, None, num_batches, None, True)
+        return metrics_dict
 
     def get_input_gradients(self) -> list[Tensor]:
         return super().get_input_gradients()

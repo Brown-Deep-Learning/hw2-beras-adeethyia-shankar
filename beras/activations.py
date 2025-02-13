@@ -29,6 +29,7 @@ class LeakyReLU(Activation):
         To see what methods/variables you have access to, refer to the cheat sheet.
         Hint: Make sure not to mutate any instance variables. Return a new list[tensor(s)]
         """
+        # TODO: check if this is how output is supposed to be
         return [Tensor(np.where(output > 0, 1, -self.alpha))
                 for output in self.outputs]
 
@@ -56,8 +57,7 @@ class Sigmoid(Activation):
         To see what methods/variables you have access to, refer to the cheat sheet.
         Hint: Make sure not to mutate any instance variables. Return a new list[tensor(s)]
         """
-        return [Tensor(self.output * (1 - self.output))
-                for output in self.outputs]
+        return [Tensor(output * (1 - output)) for output in self.outputs]
 
     def compose_input_gradients(self, J):
         return self.get_input_gradients()[0] * J
